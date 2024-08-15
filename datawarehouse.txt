@@ -1,0 +1,274 @@
+### 1. **Data Warehouse for IPL Cricket Tournament**
+
+**Fact Table:**
+- `Match_Fact`
+  - Match_ID (PK)
+  - Date
+  - Venue_ID (FK)
+  - Team1_ID (FK)
+  - Team2_ID (FK)
+  - Umpire1_ID (FK)
+  - Umpire2_ID (FK)
+  - Toss_Winner_ID (FK)
+  - Match_Winner_ID (FK)
+  - Win_Type (e.g., runs, wickets)
+  - Man_of_the_Match_ID (FK)
+  - Total_Runs
+  - Total_Wickets
+  - Total_Overs
+
+**Dimension Tables:**
+- `Team_Dimension`
+  - Team_ID (PK)
+  - Team_Name
+  - Coach_Name
+  - Home_Ground
+  - Captain_ID (FK)
+
+- `Player_Dimension`
+  - Player_ID (PK)
+  - Player_Name
+  - Team_ID (FK)
+  - Role (e.g., Batsman, Bowler)
+  - Batting_Style
+  - Bowling_Style
+
+- `Venue_Dimension`
+  - Venue_ID (PK)
+  - Venue_Name
+  - City
+  - Capacity
+
+- `Umpire_Dimension`
+  - Umpire_ID (PK)
+  - Umpire_Name
+  - Country
+
+**Schema:**
+- **Star Schema** (Match_Fact in the center connected to dimension tables).
+
+**SQL Queries:**
+1. **Top Scorer in a Tournament:**
+   ```sql
+   SELECT Player_Name, SUM(Total_Runs) AS TotalRuns
+   FROM Match_Fact mf
+   JOIN Player_Dimension pd ON mf.Man_of_the_Match_ID = pd.Player_ID
+   GROUP BY Player_Name
+   ORDER BY TotalRuns DESC
+   LIMIT 1;
+   ```
+
+2. **Teams with Most Wins:**
+   ```sql
+   SELECT Team_Name, COUNT(*) AS Wins
+   FROM Match_Fact mf
+   JOIN Team_Dimension td ON mf.Match_Winner_ID = td.Team_ID
+   GROUP BY Team_Name
+   ORDER BY Wins DESC;
+   ```
+
+### 2. **Data Warehouse for Food Delivery App (Swiggy/Zomato)**
+
+**Fact Table:**
+- `Order_Fact`
+  - Order_ID (PK)
+  - Customer_ID (FK)
+  - Restaurant_ID (FK)
+  - Delivery_Partner_ID (FK)
+  - Order_Date
+  - Delivery_Time
+  - Total_Amount
+  - Payment_Mode
+  - Discount_Applied
+  - Rating
+
+**Dimension Tables:**
+- `Customer_Dimension`
+  - Customer_ID (PK)
+  - Name
+  - Address
+  - City
+  - Phone_Number
+
+- `Restaurant_Dimension`
+  - Restaurant_ID (PK)
+  - Restaurant_Name
+  - Cuisine_Type
+  - City
+  - Rating
+
+- `Delivery_Partner_Dimension`
+  - Delivery_Partner_ID (PK)
+  - Partner_Name
+  - Partner_Rating
+
+**Schema:**
+- **Star Schema**
+
+**SQL Queries:**
+1. **Top-Rated Restaurants:**
+   ```sql
+   SELECT Restaurant_Name, AVG(Rating) AS AverageRating
+   FROM Order_Fact
+   JOIN Restaurant_Dimension USING (Restaurant_ID)
+   GROUP BY Restaurant_Name
+   ORDER BY AverageRating DESC;
+   ```
+
+2. **Most Active Customers:**
+   ```sql
+   SELECT Name, COUNT(Order_ID) AS TotalOrders
+   FROM Order_Fact
+   JOIN Customer_Dimension USING (Customer_ID)
+   GROUP BY Name
+   ORDER BY TotalOrders DESC;
+   ```
+
+### 3. **Data Warehouse for Cab Ride Service (Uber, Lyft)**
+
+**Fact Table:**
+- `Ride_Fact`
+  - Ride_ID (PK)
+  - Customer_ID (FK)
+  - Driver_ID (FK)
+  - Start_Location_ID (FK)
+  - End_Location_ID (FK)
+  - Ride_Date
+  - Fare
+  - Payment_Mode
+  - Distance
+  - Ride_Duration
+
+**Dimension Tables:**
+- `Customer_Dimension`
+  - Customer_ID (PK)
+  - Name
+  - Phone_Number
+  - Email
+  - City
+
+- `Driver_Dimension`
+  - Driver_ID (PK)
+  - Name
+  - License_Number
+  - Vehicle_Type
+  - Rating
+
+- `Location_Dimension`
+  - Location_ID (PK)
+  - Location_Name
+  - Latitude
+  - Longitude
+
+**Schema:**
+- **Star Schema**
+
+**SQL Queries:**
+1. **Top Drivers by Rating:**
+   ```sql
+   SELECT Name, AVG(Rating) AS AvgRating
+   FROM Driver_Dimension
+   GROUP BY Name
+   ORDER BY AvgRating DESC;
+   ```
+
+2. **Most Popular Routes:**
+   ```sql
+   SELECT Start_Location_ID, End_Location_ID, COUNT(*) AS TotalRides
+   FROM Ride_Fact
+   GROUP BY Start_Location_ID, End_Location_ID
+   ORDER BY TotalRides DESC;
+   ```
+
+### 4. **Data Warehouse for Restaurant Table Booking App (Dineout)**
+
+**Fact Table:**
+- `Booking_Fact`
+  - Booking_ID (PK)
+  - Customer_ID (FK)
+  - Restaurant_ID (FK)
+  - Booking_Date
+  - Table_Number
+  - Number_of_Guests
+  - Total_Spent
+
+**Dimension Tables:**
+- `Customer_Dimension`
+  - Customer_ID (PK)
+  - Name
+  - Phone_Number
+  - Email
+  - City
+
+- `Restaurant_Dimension`
+  - Restaurant_ID (PK)
+  - Restaurant_Name
+  - Cuisine_Type
+  - City
+  - Rating
+
+**Schema:**
+- **Star Schema**
+
+**SQL Queries:**
+1. **Most Booked Restaurants:**
+   ```sql
+   SELECT Restaurant_Name, COUNT(Booking_ID) AS TotalBookings
+   FROM Booking_Fact
+   JOIN Restaurant_Dimension USING (Restaurant_ID)
+   GROUP BY Restaurant_Name
+   ORDER BY TotalBookings DESC;
+   ```
+
+2. **Average Spend Per Booking:**
+   ```sql
+   SELECT AVG(Total_Spent) AS AvgSpent
+   FROM Booking_Fact;
+   ```
+
+### 5. **Data Warehouse for Covid Vaccination Application**
+
+**Fact Table:**
+- `Vaccination_Fact`
+  - Vaccination_ID (PK)
+  - Person_ID (FK)
+  - Center_ID (FK)
+  - Vaccine_Type
+  - Vaccination_Date
+  - Dose_Number
+  - Side_Effects_Reported
+
+**Dimension Tables:**
+- `Person_Dimension`
+  - Person_ID (PK)
+  - Name
+  - Age
+  - Gender
+  - Address
+
+- `Center_Dimension`
+  - Center_ID (PK)
+  - Center_Name
+  - Location
+  - Capacity
+
+**Schema:**
+- **Star Schema**
+
+**SQL Queries:**
+1. **Vaccination Count by Center:**
+   ```sql
+   SELECT Center_Name, COUNT(Vaccination_ID) AS VaccinationCount
+   FROM Vaccination_Fact
+   JOIN Center_Dimension USING (Center_ID)
+   GROUP BY Center_Name;
+   ```
+
+2. **Side Effects by Vaccine Type:**
+   ```sql
+   SELECT Vaccine_Type, COUNT(Side_Effects_Reported) AS SideEffectCount
+   FROM Vaccination_Fact
+   WHERE Side_Effects_Reported IS NOT NULL
+   GROUP BY Vaccine_Type;
+   ```
+
